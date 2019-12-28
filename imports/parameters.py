@@ -33,7 +33,7 @@ parser.add_argument('-mr', '--mud_range', type=int, metavar = "mr", help='Mud ra
 parser.add_argument('--nonconnected', action="store_true", help='Does not enforce connectivity of the maze')
 parser.add_argument('--preparation_time', type=int, metavar = "pt", help='Preparation time in milliseconds', default=3000)
 parser.add_argument('--turn_time', type=int, metavar = "tt", help='Turn time in milliseconds', default=100)
-parser.add_argument('--window_width', type=int, metavar = "ww", help='Window width (in pixels)', default=1366)
+parser.add_argument('--window_width', type=int, metavar = "ww", help='Window width (in pixels)', default=1080)
 parser.add_argument('--auto_exit', action="store_true", help='Automatically exit when game is finished (useful for scripts)')
 parser.add_argument('--wait', help='Time to wait (seconds) after a game is over. Not used when auto exit is on.', default=3)
 parser.add_argument('--desactivate_animations', action='store_true', help='Desactivate animations (for slower systems)')
