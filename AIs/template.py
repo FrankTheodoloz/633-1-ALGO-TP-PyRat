@@ -9,7 +9,7 @@ MOVE_LEFT = 'L'
 MOVE_RIGHT = 'R'
 MOVE_UP = 'U'
 
-TEAM_NAME = 'TEAM_NAME'
+TEAM_NAME = 'R@t_of_Fortune_888'
 
 ###############################
 # Please put your imports here
