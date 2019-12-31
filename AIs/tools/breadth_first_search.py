@@ -25,15 +25,15 @@ def breadth_first_search_routing(graph, source_node):
     routes = [None for i in range(len(graph))]  # crée une table de routage de la taille du graph (NEW)
 
     while graph_queue:  # si il reste quelque chose dans la queue
-        (currentNode, path) = graph_queue.pop(0)  # alloue à currentNode et path le valeurs de la queue
-        print(currentNode, "path = ", repr(path))  # écrit les valeurs
+        (current_node, path) = graph_queue.pop(0)  # alloue à current_node et path le valeurs de la queue
+        print(current_node, "path = ", repr(path))  # écrit les valeurs
 
-        for neighbor in graph[currentNode]:  # parcours les voisins du currentNode
+        for neighbor in graph[current_node]:  # parcours les voisins du current_node
             if neighbor not in visited_vertices:  # vérifie que le voisin n'a pas déjà été parcouru
                 graph_queue.append(
                     (neighbor, path + [neighbor]))  # ajoute le voisin avec son chemin (parcouru + lui-même)
                 visited_vertices.append(neighbor)  # ajoute le voisin comme visité
-                routes[neighbor] = currentNode  # ajoute le noeud courant comme chemin pour aller au voisin
+                routes[neighbor] = current_node  # ajoute le noeud courant comme chemin pour aller au voisin
 
     print("routes :", repr(routes))  # affiche les routes
 
@@ -44,17 +44,17 @@ def breadth_first_search_routing_maze(graph, source_node):
     routes = {}  # crée un dictionnaire
 
     while graph_queue:  # si il reste quelque chose dans la queue
-        (currentNode, path) = graph_queue.pop(0)  # alloue à currentNode et path le valeurs de la queue
-        # print(currentNode, "path = ", repr(path))  # écrit les valeurs
+        (current_node, path) = graph_queue.pop(0)  # alloue à current_node et path le valeurs de la queue
+        # print(current_node, "path = ", repr(path))  # écrit les valeurs
 
-        for neighbor in graph.get(currentNode):  # parcours les voisins du currentNode
+        for neighbor in graph.get(current_node):  # parcours les voisins du current_node
             if neighbor not in visited_vertices:  # vérifie que le voisin n'a pas déjà été parcouru
                 graph_queue.append(
                     (neighbor, path + [neighbor]))  # ajoute le voisin avec son chemin (parcouru + lui-même)
                 visited_vertices.append(neighbor)  # ajoute le voisin comme visité
-                routes[neighbor] = currentNode  # ajoute le noeud courant comme chemin pour aller au voisin
+                routes[neighbor] = current_node  # ajoute le noeud courant comme chemin pour aller au voisin
 
-    # print("routes :", repr(routes))  # affiche les routes
+    print("routes :", repr(routes))  # affiche les routes
     return routes
 
 
@@ -73,7 +73,7 @@ Test breadth_first_search_routing
 # routes :  [None, 0, 0, 5, 5, 0] : pour aller à 4 il faut passer par 5 pour aller à 5 il faut passer par 0 donc 0, 5, 4
 
 '''
-Test breadth_first_search_routing
+Test breadth_first_search_routing_maze
 '''
 # maze = {(0, 0): {(1, 0): 1}, (0, 1): {(0, 2): 1, (1, 1): 1}, (0, 2): {(0, 1): 1}, (0, 3): {(1, 3): 1, (0, 4): 1},
 #         (0, 4): {(0, 3): 1, (0, 5): 1}, (0, 5): {(0, 4): 1, (0, 6): 1}, (0, 6): {(1, 6): 1, (0, 5): 1},
