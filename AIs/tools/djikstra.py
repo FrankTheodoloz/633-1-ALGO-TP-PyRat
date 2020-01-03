@@ -1,82 +1,81 @@
 import heapq
 
 
-# Utility function that inserts an element to the min-heap, or replaces it otherwise
-def insert_or_replace(min_heap, element, weight):
-    # Insert if does not exist
-    if element not in [x[1] for x in min_heap]:
-        heapq.heappush(min_heap, (weight, element))
+def insert_or_replace(min_heapq, node, distance) -> None:
+    """ Function that insert or replaces an element to the heapq """
+    if node not in [x[1] for x in min_heapq]:  # insert if not existing
+        heapq.heappush(min_heapq, (distance, node))
 
-    # Replace otherwise
-    else:
-        index_to_update = [x[1] for x in min_heap].index(element)
-        min_heap[index_to_update] = (weight, element)
-        heapq.heapify(min_heap)
+    else:  # replace if existing
+        index_to_update = [x[1] for x in min_heapq].index(node)
+        min_heapq[index_to_update] = (distance, node)
+        heapq.heapify(min_heapq)
 
 
-def dijkstra(graph, source_node):
-    # Partie initialisation
-    distances = [float("inf") for i in range(len(graph))]
-    min_heap = [(0, source_node)]
-    distances[source_node] = 0
+def dijkstra(graph: dict, source_node: int) -> list:
+    """ Djikstra algorithm that returns distances between nodes in graph """
+    distances: list = [float("inf") for i in range(len(graph))]  # init distances list for each node to inf
+    min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
+    distances[source_node] = 0  # init distance from current node to current node which is obviously 0
 
-    while len(min_heap) != 0:  # tant qu'il y qqch dans le tas (i.e. un voisin à traiter)
+    while len(min_heap) != 0:  # while there is a neighbour to process
 
-        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # prend le noeud le plus proche (priorité)
+        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # takes closest node from heap queue
 
-        for (neighbor, weight) in graph[closest_node]:  # pour chaque voisin
-            neighbor_distance = closest_node_distance + weight  # distance = distance du noeud courant + du voisin
-            if neighbor_distance < distances[neighbor]:  # si le chemin est plus court que celui connu (ou infini)
-                insert_or_replace(min_heap, neighbor, neighbor_distance)  # mettre dans la file de priorité
-                distances[neighbor] = neighbor_distance  # màj de la distance dans le tableau des distances
+        for (neighbor, weight) in graph[closest_node]:  # for each neighbour
+            neighbor_distance = closest_node_distance + weight  # distance = distance of current node + to neighbor
+            if neighbor_distance < distances[neighbor]:  # if distance is closest than known (of inf)
+                insert_or_replace(min_heap, neighbor, neighbor_distance)  # insert in heap queue
+                distances[neighbor] = neighbor_distance  # update distance in distances list
 
-    return distances  # retourne le tableau des distances
-
-
-def dijkstra_route(graph, source_node):
-    # Partie initialisation
-    distances = [float("inf") for i in range(len(graph))]  # tableau pour les distances de chaque noeud à l'infini
-    min_heap = [(0, source_node)]  # sert à connaître les voisins à traiter et la distance min pour y arriver1110111111
-    distances[source_node] = 0
-
-    predecessors = [None for i in range(len(graph))]  # tableau de routage pour le plus court chemin vers le noeud
-
-    while len(min_heap) != 0:  # tant qu'il y qqch dans le tas (i.e. un voisin à traiter)
-
-        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # prend le noeud le plus proche (priorité)
-
-        for (neighbor, weight) in graph[closest_node]:  # pour chaque voisin
-            neighbor_distance = closest_node_distance + weight  # distance = distance du noeud courant + du voisin
-            if neighbor_distance < distances[neighbor]:  # si le chemin est plus court que celui connu (ou infini)
-                insert_or_replace(min_heap, neighbor, neighbor_distance)  # mettre dans la file de priorité
-                distances[neighbor] = neighbor_distance  # màj de la distance dans le tableau des distances
-                predecessors[neighbor] = closest_node  # màj du chemin dans la table de routage
-
-    return distances, predecessors  # retourne un couple (tableau distances, tableau routes)
+    return distances  # return distances list
 
 
-def dijkstra_route_maze(graph, source_node):
-    # Partie initialisation
-    distances = dict.fromkeys(graph, float("inf"))  # tableau pour les distances de chaque noeud à l'infini
-    min_heap = [(0, source_node)]  # sert à connaître les voisins à traiter et la distance min pour y arriver1110111111
-    distances[source_node] = 0
+def dijkstra_route(graph: dict, source_node: int) -> (dict, dict):
+    """ Djikstra algorithm that returns distances between nodes in graph and a routing table """
+    distances: list = [float("inf") for i in range(len(graph))]  # init distances list for each node to inf
+    min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
+    distances[source_node] = 0  # init distance from current node to current node which is obviously 0
 
-    predecessors = dict.fromkeys(graph, None)  # tableau de routage pour le plus court chemin vers le noeud
+    predecessors: list = [None for i in range(len(graph))]  # routing table with shortest path to node
 
-    while len(min_heap) != 0:  # tant qu'il y qqch dans le tas (i.e. un voisin à traiter)
+    while len(min_heap) != 0:  # while there is a neighbour to process
 
-        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # prend le noeud le plus proche (priorité)
+        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # takes closest node from heap queue
+
+        for (neighbor, weight) in graph[closest_node]:  # for each neighbour
+            neighbor_distance = closest_node_distance + weight  # distance = distance of current node + to neighbor
+            if neighbor_distance < distances[neighbor]:  # if distance is closest than known (of inf)
+                insert_or_replace(min_heap, neighbor, neighbor_distance)  # insert in heap queue
+                distances[neighbor] = neighbor_distance  # update distance in distances list
+                predecessors[neighbor] = closest_node  # update routing table with closest node of neighbour
+
+    return distances, predecessors  # return (distances list, routes list) tuple
+
+
+def dijkstra_route_maze(graph: dict, source_node: tuple) -> (dict, dict):
+    """ Djikstra algorithm that returns distances between nodes in maze and a routing table """
+    # initialisation
+    distances: dict = dict.fromkeys(graph, float("inf"))  # init distances list for each node to inf
+    min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
+    distances[source_node] = 0  # init distance from current node to current node which is obviously 0
+
+    predecessors: dict = dict.fromkeys(graph, None)  # routing table with shortest path to node
+
+    while len(min_heap) != 0:  # while there is a neighbour to process
+
+        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # takes closest node from heap queue
 
         neighbors = graph.get(closest_node).items()  #
 
-        for neighbor, weight in neighbors:  # pour chaque voisin
-            neighbor_distance = closest_node_distance + weight  # distance = distance du noeud courant + du voisin
-            if neighbor_distance < distances[neighbor]:  # si le chemin est plus court que celui connu (ou infini)
-                insert_or_replace(min_heap, neighbor, neighbor_distance)  # mettre dans la file de priorité
-                distances.update({neighbor: neighbor_distance})  # màj de la distance dans le tableau des distances
-                predecessors[neighbor] = closest_node  # màj du chemin dans la table de routage
+        for neighbor, weight in neighbors:  # for each neighbour
+            neighbor_distance = closest_node_distance + weight  # distance = distance of current node + to neighbor
+            if neighbor_distance < distances[neighbor]:  # if distance is closest than known (of inf)
+                insert_or_replace(min_heap, neighbor, neighbor_distance)  # insert in heap queue
+                distances.update({neighbor: neighbor_distance})  # update distance in distances list
+                predecessors[neighbor] = closest_node  # update routing table with closest node of neighbour
 
-    return distances, predecessors  # retourne un couple (tableau distances, tableau routes)
+    return distances, predecessors  # return (distances dict, routes dict) tuple
 
 
 '''
@@ -98,7 +97,7 @@ Test dijkstra_route
 # print(repr(result_route))  # ([0, 1, 2, 4, 6, 2], [None, 0, 1, 5, 3, 1])
 
 '''
-Test dijkstra_route_maze
+Maze for test dijkstra_route_*
 '''
 # maze = {(0, 0): {(1, 0): 1}, (0, 1): {(0, 2): 1, (1, 1): 1}, (0, 2): {(0, 1): 1}, (0, 3): {(1, 3): 1, (0, 4): 1},
 #         (0, 4): {(0, 3): 1, (0, 5): 1}, (0, 5): {(0, 4): 1, (0, 6): 1}, (0, 6): {(1, 6): 1, (0, 5): 1},
@@ -117,9 +116,12 @@ Test dijkstra_route_maze
 #         (5, 5): {(5, 6): 1, (6, 5): 1, (5, 4): 1}, (5, 6): {(4, 6): 1, (5, 5): 1, (6, 6): 1},
 #         (6, 0): {(5, 0): 1, (6, 1): 1}, (6, 1): {(6, 2): 1, (6, 0): 1}, (6, 2): {(6, 3): 1, (6, 1): 1},
 #         (6, 3): {(5, 3): 1, (6, 2): 1}, (6, 4): {(6, 5): 1}, (6, 5): {(6, 4): 1, (5, 5): 1}, (6, 6): {(5, 6): 1}}
+
+'''
+Test dijkstra_route_maze
+'''
 # location = (0, 0)
 # result_route_maze = dijkstra_route_maze(maze, location)
-#
 # print(repr(result_route_maze))
 #
 # ({(0, 0): 0, (0, 1): 3, (0, 2): 4, (0, 3): 11, (0, 4): 12, (0, 5): 13, (0, 6): 14,
