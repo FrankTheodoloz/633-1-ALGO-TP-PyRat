@@ -15,20 +15,19 @@ from AIs.tools.depth_first_search import *
 
 ###############################
 # Please put your global variables here
-ROUTES = {}
-PATH = []
+PATHS_TO_POC = {}
+MOVES_TO_TARGET = []
 
 
 #  Gets the routes from the maze
 def get_routes(maze_map, source_location):
     routes = depth_first_search_routing(maze_map, source_location)
-    # print("routes:", repr(routes))
     return routes
 
 
 #  Gets the path to the target
 def get_path(target_location):
-    return ROUTES[target_location]
+    return PATHS_TO_POC[target_location]
 
 
 def move_from_location(source_location, target_location):
@@ -63,15 +62,12 @@ def move_from_location(source_location, target_location):
 ###############################
 # This function is not expected to return anything
 def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, piecesOfCheese, timeAllowed):
-    global ROUTES
-    global PATH
-
-    # print("maze", mazeMap)
-    # print("piecesOfCheese", piecesOfCheese)
+    global PATHS_TO_POC
+    global MOVES_TO_TARGET
 
     ROUTES = get_routes(mazeMap, playerLocation)
-    PATH = get_path(piecesOfCheese[0])
-    print("path to do:", repr(PATH))
+    PATH_TO_TARGET = get_path(piecesOfCheese[0])
+    print("path to do:", repr(PATH_TO_TARGET))
 
 
 ###############################
@@ -93,5 +89,6 @@ def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocati
 # This function is expected to return a move
 def turn(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, playerScore, opponentScore, piecesOfCheese,
          timeAllowed):
-    while PATH:
-        return move_from_location(playerLocation, PATH.pop(1))  # removes second item since player location is the first
+    while MOVES_TO_TARGET:
+        return move_from_location(playerLocation,
+                                  MOVES_TO_TARGET.pop(1))  # removes second item since player location is the first

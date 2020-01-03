@@ -9,7 +9,7 @@ MOVE_LEFT = 'L'
 MOVE_RIGHT = 'R'
 MOVE_UP = 'U'
 
-TEAM_NAME = '[BFS] R@t_of_Fortune_888'
+TEAM_NAME = '[DJIKSTRA] R@t_of_Fortune_888'
 
 ###############################
 # Please put your imports here
@@ -18,14 +18,13 @@ from AIs.tools.djikstra import *
 
 ###############################
 # Please put your global variables here
-ROUTES = {}
-PATH = []
+PATHS_TO_POC = {}
+MOVES_TO_TARGET = []
 
 
 #  Gets the routes from the maze
 def get_routes(maze_map, source_location):
     distances, routes = dijkstra_route_maze(maze_map, source_location)
-    # print("routes:", repr(routes))
     return routes
 
 
@@ -37,8 +36,8 @@ def get_path(player_location, target_location):
     def recursive_path_find(location):
         stack.append(location)
 
-        if ROUTES.get(location) != player_location:  # until the initial location is met
-            recursive_path_find(ROUTES.get(location))  # invoke recursion
+        if PATHS_TO_POC.get(location) != player_location:  # until the initial location is met
+            recursive_path_find(PATHS_TO_POC.get(location))  # invoke recursion
         else:
             return
 
@@ -48,7 +47,6 @@ def get_path(player_location, target_location):
 
 
 def move_from_location(source_location, target_location):
-    print("going from:", source_location, "to:", target_location)
     difference = tuple(numpy.subtract(target_location, source_location))
     if difference == (0, -1):
         return MOVE_DOWN
@@ -79,11 +77,8 @@ def move_from_location(source_location, target_location):
 ###############################
 # This function is not expected to return anything
 def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, piecesOfCheese, timeAllowed):
-    global ROUTES
-    global PATH
-
-    # print("maze", mazeMap)
-    # print("piecesOfCheese", piecesOfCheese)
+    global PATHS_TO_POC
+    global MOVES_TO_TARGET
 
     ROUTES = get_routes(mazeMap, playerLocation)
     PATH = get_path(playerLocation, piecesOfCheese[0])
@@ -109,5 +104,5 @@ def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocati
 # This function is expected to return a move
 def turn(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, playerScore, opponentScore, piecesOfCheese,
          timeAllowed):
-    while PATH:
-        return move_from_location(playerLocation, PATH.pop())
+    while MOVES_TO_TARGET:
+        return move_from_location(playerLocation, MOVES_TO_TARGET.pop())
