@@ -12,6 +12,28 @@ def insert_or_replace(min_heapq, node, distance) -> None:
         heapq.heapify(min_heapq)
 
 
+def get_min_max_values(maze_width: int, maze_height: int, location: tuple, max_depth: int) -> (tuple, tuple):
+    """ Function that returns min/max values for x and y from a point and within a max_depth of nodes """
+
+    def min_max(location_point: int, max_depth: int, max_axis_value: int) -> tuple:
+        """ Function that returns min/max values for an axis within a max_depth """
+        low: int = (location_point - max_depth)
+        high: int = (location_point + max_depth)
+
+        # corrects the values if out of the maze
+        if low < 0:  # below 0
+            low = 0
+        if high > max_axis_value:  # above maze_height/width
+            high = max_axis_value
+
+        return low, high
+
+    (min_x, max_x) = min_max(location[0], max_depth, maze_width)
+    (min_y, max_y) = min_max(location[1], max_depth, maze_height)
+
+    return (min_x, max_x), (min_y, max_y)
+
+
 def dijkstra(graph: dict, source_node: int) -> list:
     """ Djikstra algorithm that returns distances between nodes in graph """
     distances: list = [float("inf") for i in range(len(graph))]  # init distances list for each node to inf
@@ -74,6 +96,40 @@ def dijkstra_route_maze(graph: dict, source_node: tuple) -> (dict, dict):
                 insert_or_replace(min_heap, neighbor, neighbor_distance)  # insert in heap queue
                 distances.update({neighbor: neighbor_distance})  # update distance in distances list
                 predecessors[neighbor] = closest_node  # update routing table with closest node of neighbour
+
+    return distances, predecessors  # return (distances dict, routes dict) tuple
+
+
+def dijkstra_route_maze_range(graph: dict, maze_width: int, maze_height: int, source_node: tuple, max_depth: int) -> (
+        dict, dict):
+    """ Djikstra algorithm that returns distances between nodes in maze and a routing table within a max_depth """
+    distances: dict = dict.fromkeys(graph, float("inf"))  # init distances list for each node to inf
+    min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
+    distances[source_node] = 0  # init distance from current node to current node which is obviously 0
+
+    range_x: tuple  # min/max values for x
+    range_y: tuple  # min/max values for y
+    range_x, range_y = get_min_max_values(maze_width, maze_height, source_node, max_depth)
+
+    predecessors: dict = dict.fromkeys(graph, None)  # routing table with shortest path to node
+
+    while len(min_heap) != 0:  # while there is a neighbour to process
+
+        (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # takes closest node from heap queue
+
+        # print("closest node:", closest_node, "items:", repr(graph.get(closest_node).items()))
+        neighbors: list = graph.get(closest_node).items()  #
+
+        for neighbor, weight in neighbors:  # for each neighbour
+            # if the neihbour is not within the range, do not explore it
+            if not (range_x[0] <= neighbor[0] <= range_x[1] and range_y[0] <= neighbor[1] <= range_y[1]):
+                pass
+            else:
+                neighbor_distance: int = closest_node_distance + weight  # distance = distance of current node + to neighbor
+                if neighbor_distance < distances[neighbor]:  # if distance is closest than known (of inf)
+                    insert_or_replace(min_heap, neighbor, neighbor_distance)  # insert in heap queue
+                    distances.update({neighbor: neighbor_distance})  # update distance in distances list
+                    predecessors[neighbor] = closest_node  # update routing table with closest node of neighbour
 
     return distances, predecessors  # return (distances dict, routes dict) tuple
 
@@ -145,3 +201,25 @@ Test dijkstra_route_maze
 #  (4, 0): (3, 0), (4, 1): (3, 1), (4, 2): (4, 1), (4, 3): (4, 4), (4, 4): (5, 4), (4, 5): (4, 6), (4, 6): (3, 6),
 #  (5, 0): (5, 1), (5, 1): (4, 1), (5, 2): (5, 1), (5, 3): (6, 3), (5, 4): (5, 3), (5, 5): (5, 4), (5, 6): (4, 6),
 #  (6, 0): (5, 0), (6, 1): (6, 0), (6, 2): (6, 1), (6, 3): (6, 2), (6, 4): (6, 5), (6, 5): (5, 5), (6, 6): (5, 6)})
+
+'''
+Test dijkstra_route_maze_range
+'''
+# location = (0, 0)
+# result_route_maze_range = dijkstra_route_maze_range(maze, 25, 15, location, 4)
+# print(repr(result_route_maze_range))
+#
+# ({(0, 0): 0, (0, 1): 3, (0, 2): 4, (0, 3): 11, (0, 4): 12, (0, 5): inf, (0, 6): inf, (1, 0): 1, (1, 1): 2, (1, 2): 3,
+#   (1, 3): 10, (1, 4): inf, (1, 5): inf, (1, 6): inf, (2, 0): 2, (2, 1): 3, (2, 2): 4, (2, 3): 5, (2, 4): 17,
+#   (2, 5): inf, (2, 6): inf, (3, 0): 3, (3, 1): 4, (3, 2): 13, (3, 3): 14, (3, 4): 15, (3, 5): inf, (3, 6): inf,
+#   (4, 0): 4, (4, 1): 5, (4, 2): 11, (4, 3): inf, (4, 4): inf, (4, 5): inf, (4, 6): inf, (5, 0): inf, (5, 1): inf,
+#   (5, 2): inf, (5, 3): inf, (5, 4): inf, (5, 5): inf, (5, 6): inf, (6, 0): inf, (6, 1): inf, (6, 2): inf, (6, 3): inf,
+#   (6, 4): inf, (6, 5): inf, (6, 6): inf},
+#
+#  {(0, 0): None, (0, 1): (1, 1), (0, 2): (0, 1), (0, 3): (1, 3), (0, 4): (0, 3), (0, 5): None, (0, 6): None,
+#   (1, 0): (0, 0), (1, 1): (1, 0), (1, 2): (1, 1), (1, 3): (1, 2), (1, 4): None, (1, 5): None, (1, 6): None,
+#   (2, 0): (1, 0), (2, 1): (2, 0), (2, 2): (1, 2), (2, 3): (2, 2), (2, 4): (3, 4), (2, 5): None, (2, 6): None,
+#   (3, 0): (2, 0), (3, 1): (3, 0), (3, 2): (4, 2), (3, 3): (3, 2), (3, 4): (3, 3), (3, 5): None, (3, 6): None,
+#   (4, 0): (3, 0), (4, 1): (3, 1), (4, 2): (4, 1), (4, 3): None, (4, 4): None, (4, 5): None, (4, 6): None, (5, 0): None,
+#   (5, 1): None, (5, 2): None, (5, 3): None, (5, 4): None, (5, 5): None, (5, 6): None, (6, 0): None, (6, 1): None,
+#   (6, 2): None, (6, 3): None, (6, 4): None, (6, 5): None, (6, 6): None})
