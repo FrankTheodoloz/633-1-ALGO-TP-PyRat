@@ -1,6 +1,3 @@
-# Template file to create an AI for the game PyRat
-# http://formations.telecom-bretagne.eu/pyrat
-
 ###############################
 # When the player is performing a move, it actually sends a character to the main program
 # The four possibilities are defined here
@@ -14,41 +11,44 @@ TEAM_NAME = '[BFS] R@t_of_Fortune_888'
 ###############################
 # Please put your imports here
 import numpy
-from AIs.tools.breadth_first_search import *
+from AIs.tools.breadth_first_search import breadth_first_search_routing_maze as breadth_first_search
+from typing import Tuple, List, Dict
 
 ###############################
 # Please put your global variables here
-PATHS_TO_POC = {}
-MOVES_TO_TARGET = []
+Node = Tuple[int, int]
+ROUTES: Dict[Node, Node]  # routing table
+MOVES_TO_TARGET: List[Node] = []
 
 
-#  Gets the routes from the maze
-def get_routes(maze_map, source_location):
-    routes = breadth_first_search_routing_maze(maze_map, source_location)
-    return routes
+def get_routes(maze_map: Dict[Node, Dict[Node, int]], source_location: Node) -> Dict[Node, Node]:
+    """ Function that returns a dict of routes """
+    return breadth_first_search(maze_map, source_location)
 
 
-#  Gets the path to the target by querying the route recursively
-def get_path(player_location, target_location):
-    stack = []
+def get_path(source_location: Node, target_location: Node) -> List[Node]:
+    """ Function that returns a list, a path between two locations """
+    path: List[Node] = []
 
-    #  recursive function that gets the route from target to initial location recursively
-    def recursive_path_find(location):
-        stack.append(location)
+    def recursive_path_find(location: Node):
+        """ Recursive function that gets the path from target to source location """
 
-        if PATHS_TO_POC.get(location) != player_location:  # until the initial location is met
-            recursive_path_find(PATHS_TO_POC.get(location))  # invoke recursion
+        path.append(location)
+
+        if ROUTES.get(location) != source_location:  # until the initial location is met
+            recursive_path_find(ROUTES.get(location))  # invoke recursion
         else:
             return
 
-    recursive_path_find(target_location)  # starts recursion
+    recursive_path_find(target_location)  # invoke recursion
 
-    return stack
+    return path
 
 
-def move_from_location(source_location, target_location):
-    print("going from:", source_location, "to:", target_location)
-    difference = tuple(numpy.subtract(target_location, source_location))
+def move_from_location(source_location: Node, target_location: Node) -> str:
+    """ Function that return the move to do from a source to a target """
+    # print("going from:", source_location, "to:", target_location)
+    difference: Tuple[int, int] = tuple(numpy.subtract(target_location, source_location))
     if difference == (0, -1):
         return MOVE_DOWN
     elif difference == (0, 1):
@@ -78,12 +78,12 @@ def move_from_location(source_location, target_location):
 ###############################
 # This function is not expected to return anything
 def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, piecesOfCheese, timeAllowed):
-    global PATHS_TO_POC
+    global ROUTES
     global MOVES_TO_TARGET
 
     ROUTES = get_routes(mazeMap, playerLocation)
-    PATH = get_path(playerLocation, piecesOfCheese[0])
-    print("path to do:", repr(PATH))
+    MOVES_TO_TARGET = get_path(playerLocation, piecesOfCheese[0])
+    print("path to do:", repr(MOVES_TO_TARGET))
 
 
 ###############################
@@ -105,5 +105,6 @@ def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocati
 # This function is expected to return a move
 def turn(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, playerScore, opponentScore, piecesOfCheese,
          timeAllowed):
+    global MOVES_TO_TARGET
     while MOVES_TO_TARGET:
         return move_from_location(playerLocation, MOVES_TO_TARGET.pop())
