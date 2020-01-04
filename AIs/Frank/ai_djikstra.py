@@ -6,12 +6,12 @@ MOVE_LEFT = 'L'
 MOVE_RIGHT = 'R'
 MOVE_UP = 'U'
 
-TEAM_NAME = '[DJIKSTRA] R@t_of_Fortune_888'
+TEAM_NAME = 'Djikstra'
 
 ###############################
 # Please put your imports here
 import numpy
-from AIs.tools.djikstra import *
+from AIs.tools.djikstra import dijkstra_route_maze as djikstra
 from typing import Tuple, List, Dict
 
 ###############################
@@ -28,7 +28,7 @@ def get_closest_poc(maze_map: Dict[Node, Dict[Node, int]], source_location: Node
     # get distances and routes around location
     distances: Dict[Node]
     routes: Dict[Node]
-    (distances, routes) = dijkstra_route_maze(maze_map, source_location)
+    (distances, routes) = djikstra(maze_map, source_location)
 
     # get min distances to poc
     poc_distances: Dict[Node, int] = {k: v for k, v in distances.items() if
