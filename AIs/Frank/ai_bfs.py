@@ -6,7 +6,7 @@ MOVE_LEFT = 'L'
 MOVE_RIGHT = 'R'
 MOVE_UP = 'U'
 
-TEAM_NAME = '[BFS] R@t_of_Fortune_888'
+TEAM_NAME = 'Breadth first search'
 
 ###############################
 # Please put your imports here
@@ -18,16 +18,16 @@ from typing import Tuple, List, Dict
 # Please put your global variables here
 Node = Tuple[int, int]
 ROUTES: Dict[Node, Node]  # routing table
-MOVES_TO_TARGET: List[Node] = []
+MOVES_TO_TARGET: List[Node] = []  # stack of moves
 
 
 def get_routes(maze_map: Dict[Node, Dict[Node, int]], source_location: Node) -> Dict[Node, Node]:
-    """ Function that returns a dict of routes """
+    """ Function that returns a dict of routes using bfs """
     return breadth_first_search(maze_map, source_location)
 
 
 def get_path(source_location: Node, target_location: Node) -> List[Node]:
-    """ Function that returns a list, a path between two locations """
+    """ Function that returns a path to a node from the ROUTES """
     path: List[Node] = []
 
     def recursive_path_find(location: Node):
@@ -105,6 +105,5 @@ def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocati
 # This function is expected to return a move
 def turn(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, playerScore, opponentScore, piecesOfCheese,
          timeAllowed):
-    global MOVES_TO_TARGET
     while MOVES_TO_TARGET:
-        return move_from_location(playerLocation, MOVES_TO_TARGET.pop())
+        return move_from_location(playerLocation, MOVES_TO_TARGET.pop())  # stack
