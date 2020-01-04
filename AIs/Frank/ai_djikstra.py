@@ -18,35 +18,53 @@ from AIs.tools.djikstra import *
 
 ###############################
 # Please put your global variables here
-PATHS_TO_POC = {}
-MOVES_TO_TARGET = []
+PATHS_TO_POC: list = []  # queue: from closest to farthest
+MOVES_TO_TARGET: list = []  # stack: from target to source
 
 
-#  Gets the routes from the maze
-def get_routes(maze_map, source_location):
-    distances, routes = dijkstra_route_maze(maze_map, source_location)
-    return routes
+def get_closest_poc(maze_map: dict, source_location: tuple, piecesOfCheese: list) -> None:
+    """ Function that build routes of closests pieces of cheese """
+    global PATHS_TO_POC
+
+    # get distances and routes around location
+    distances: dict
+    toutes: dict
+    # (distances, routes) = dijkstra_route_maze_range(maze_map, maze_width, maze_height, source_location, MAX_DEPTH)
+    (distances, routes) = dijkstra_route_maze(maze_map, source_location)
+
+    # get min distances to poc
+    poc_distances: dict = {k: v for k, v in distances.items() if 0 < v < float("inf") and k in piecesOfCheese}
+
+    # closest_poc: tuple = (float("inf"), float("inf"))  # source_location
+    closest_poc: tuple = source_location  # source_location
+
+    # select closest poc
+    if poc_distances.keys():
+        closest_poc = min(poc_distances, key=poc_distances.get)
+
+    # add the route to the next closest poc in the closest_poc
+    PATHS_TO_POC.append(get_path(source_location, closest_poc, routes))
 
 
-#  Gets the path to the target by querying the route recursively
-def get_path(player_location, target_location):
-    stack = []
+def get_path(source_location: tuple, target_location: tuple, routes: dict) -> list:
+    """ Function that returns a path to a point from the routing table """
+    path: list = []
 
-    #  recursive function that gets the route from target to initial location recursively
     def recursive_path_find(location):
-        stack.append(location)
+        """ Recursive function that gets the path from target to initial location """
+        path.append(location)
 
-        if PATHS_TO_POC.get(location) != player_location:  # until the initial location is met
-            recursive_path_find(PATHS_TO_POC.get(location))  # invoke recursion
-        else:
-            return
+        if routes.get(location) != source_location:  # until the initial location is met
+            recursive_path_find(routes.get(location))  # invoke recursion
 
-    recursive_path_find(target_location)  # starts recursion
+    recursive_path_find(target_location)  # invoke recursion
 
-    return stack
+    return path
 
 
-def move_from_location(source_location, target_location):
+def move_from_location(source_location: tuple, target_location: tuple):
+    """ Function that return the move to do from a source to a target """
+    # print("going from:", source_location, "to:", target_location)
     difference = tuple(numpy.subtract(target_location, source_location))
     if difference == (0, -1):
         return MOVE_DOWN
@@ -80,9 +98,8 @@ def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocati
     global PATHS_TO_POC
     global MOVES_TO_TARGET
 
-    ROUTES = get_routes(mazeMap, playerLocation)
-    PATH = get_path(playerLocation, piecesOfCheese[0])
-    print("path to do:", repr(PATH))
+    get_closest_poc(mazeMap, playerLocation, piecesOfCheese)
+    MOVES_TO_TARGET = PATHS_TO_POC.pop()
 
 
 ###############################
@@ -104,5 +121,14 @@ def preprocessing(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocati
 # This function is expected to return a move
 def turn(mazeMap, mazeWidth, mazeHeight, playerLocation, opponentLocation, playerScore, opponentScore, piecesOfCheese,
          timeAllowed):
-    while MOVES_TO_TARGET:
-        return move_from_location(playerLocation, MOVES_TO_TARGET.pop())
+    global PATHS_TO_POC
+    global MOVES_TO_TARGET
+
+    # if there are no remaining moves or poc has been eaten by opponent
+    if not MOVES_TO_TARGET or MOVES_TO_TARGET[0] not in piecesOfCheese:
+        # recalculate paths from playerLocation
+        MOVES_TO_TARGET, PATHS_TO_POC = [], []
+        get_closest_poc(mazeMap, playerLocation, piecesOfCheese)
+        MOVES_TO_TARGET = PATHS_TO_POC.pop(0)  # process next path
+
+    return move_from_location(playerLocation, MOVES_TO_TARGET.pop())
