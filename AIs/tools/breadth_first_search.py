@@ -40,7 +40,7 @@ def breadth_first_search_routing(graph: List[List], source_node: int) -> List[in
 
 
 # For Pyrat maze
-def breadth_first_search_routing_maze(graph: Dict[Node, List[Node]], source_node: Node) -> Dict[Node, Node]:
+def breadth_first_search_routing_maze(graph: Dict[Node, Dict[Node, int]], source_node: Node) -> Dict[Node, Node]:
     """ Function BFS that return a list of routes from source_node to all other nodes """
     graph_queue: List[Tuple[Node, List[Node]]] = [(source_node, [source_node])]  # add source_node to queue
     visited_vertices: List[Node] = [source_node]  # add source_node as visited
