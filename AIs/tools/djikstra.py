@@ -1,7 +1,12 @@
+# Djikstra algorithm
 import heapq
+from typing import Tuple, List, Dict, Union, ItemsView
+
+Node = Tuple[int, int]
+Range = Tuple[int, int]
 
 
-def insert_or_replace(min_heapq, node, distance) -> None:
+def insert_or_replace(min_heapq: heapq, node: Node, distance: int) -> None:
     """ Function that insert or replaces an element to the heapq """
     if node not in [x[1] for x in min_heapq]:  # insert if not existing
         heapq.heappush(min_heapq, (distance, node))
@@ -12,10 +17,10 @@ def insert_or_replace(min_heapq, node, distance) -> None:
         heapq.heapify(min_heapq)
 
 
-def get_min_max_values(maze_width: int, maze_height: int, location: tuple, max_depth: int) -> (tuple, tuple):
+def get_min_max_values(maze_width: int, maze_height: int, location: Node, max_depth: int) -> Tuple[Range, Range]:
     """ Function that returns min/max values for x and y from a point and within a max_depth of nodes """
 
-    def min_max(location_point: int, max_depth: int, max_axis_value: int) -> tuple:
+    def min_max(location_point: int, max_depth: int, max_axis_value: int) -> Range:
         """ Function that returns min/max values for an axis within a max_depth """
         low: int = (location_point - max_depth)
         high: int = (location_point + max_depth)
@@ -34,9 +39,10 @@ def get_min_max_values(maze_width: int, maze_height: int, location: tuple, max_d
     return (min_x, max_x), (min_y, max_y)
 
 
-def dijkstra(graph: dict, source_node: int) -> list:
+def dijkstra(graph: List[List[Node]], source_node: int) -> List[int]:
     """ Djikstra algorithm that returns distances between nodes in graph """
-    distances: list = [float("inf") for i in range(len(graph))]  # init distances list for each node to inf
+    distances: List[Union[int, float]] = [float("inf") for i in
+                                          range(len(graph))]  # init distances for each node to inf
     min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
     distances[source_node] = 0  # init distance from current node to current node which is obviously 0
 
@@ -53,13 +59,13 @@ def dijkstra(graph: dict, source_node: int) -> list:
     return distances  # return distances list
 
 
-def dijkstra_route(graph: dict, source_node: int) -> (dict, dict):
+def dijkstra_route(graph: List[List[Node]], source_node: int) -> Tuple[List[int], List[int]]:
     """ Djikstra algorithm that returns distances between nodes in graph and a routing table """
-    distances: list = [float("inf") for i in range(len(graph))]  # init distances list for each node to inf
+    distances: List[Union[int, float]] = [float("inf") for i in range(len(graph))]  # init distance for each node to inf
     min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
-    distances[source_node] = 0  # init distance from current node to current node which is obviously 0
+    distances[source_node]: List[int] = 0  # init distance from current node to current node which is obviously 0
 
-    predecessors: list = [None for i in range(len(graph))]  # routing table with shortest path to node
+    predecessors: List[Union[int, None]] = [None for i in range(len(graph))]  # routing table with shortest path to node
 
     while len(min_heap) != 0:  # while there is a neighbour to process
 
@@ -72,23 +78,26 @@ def dijkstra_route(graph: dict, source_node: int) -> (dict, dict):
                 distances[neighbor] = neighbor_distance  # update distance in distances list
                 predecessors[neighbor] = closest_node  # update routing table with closest node of neighbour
 
-    return distances, predecessors  # return (distances list, routes list) tuple
+    return distances, predecessors  # return distances list, routes list tuple
 
 
-def dijkstra_route_maze(graph: dict, source_node: tuple) -> (dict, dict):
+def dijkstra_route_maze(graph: Dict[Node, Dict[Node, int]], source_node: Node) \
+        -> Tuple[Dict[Node, int], Dict[Node, Node]]:
     """ Djikstra algorithm that returns distances between nodes in maze and a routing table """
     # initialisation
-    distances: dict = dict.fromkeys(graph, float("inf"))  # init distances list for each node to inf
+    distances: Dict[Node, Union[int, float]] = dict.fromkeys(graph, float("inf"))  # init distances for each node to inf
     min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
     distances[source_node] = 0  # init distance from current node to current node which is obviously 0
 
-    predecessors: dict = dict.fromkeys(graph, None)  # routing table with shortest path to node
+    predecessors: Dict[Node, Union[Node, None]] = dict.fromkeys(graph, None)  # routing table with shortest path to node
 
     while len(min_heap) != 0:  # while there is a neighbour to process
 
+        closest_node_distance: int
+        closest_node: Node
         (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # takes closest node from heap queue
 
-        neighbors = graph.get(closest_node).items()  #
+        neighbors: ItemsView[Node] = graph.get(closest_node).items()  #
 
         for neighbor, weight in neighbors:  # for each neighbour
             neighbor_distance = closest_node_distance + weight  # distance = distance of current node + to neighbor
@@ -100,26 +109,30 @@ def dijkstra_route_maze(graph: dict, source_node: tuple) -> (dict, dict):
     return distances, predecessors  # return (distances dict, routes dict) tuple
 
 
-def dijkstra_route_maze_range(graph: dict, maze_width: int, maze_height: int, source_node: tuple, max_depth: int) -> (
-        dict, dict):
+def dijkstra_route_maze_range(graph: Dict[Node, Dict[Node, int]], maze_width: int, maze_height: int, source_node: Node,
+                              max_depth: int) -> Tuple[Dict[Node, int], Dict[Node, Node]]:
     """ Djikstra algorithm that returns distances between nodes in maze and a routing table within a max_depth """
-    distances: dict = dict.fromkeys(graph, float("inf"))  # init distances list for each node to inf
+    distances: Dict[Node, Union[int, float]] = dict.fromkeys(graph, float("inf"))  # init distances for each node to inf
     min_heap: heapq = [(0, source_node)]  # init priority queue with neighbours of current node
     distances[source_node] = 0  # init distance from current node to current node which is obviously 0
 
-    range_x: tuple  # min/max values for x
-    range_y: tuple  # min/max values for y
-    range_x, range_y = get_min_max_values(maze_width, maze_height, source_node, max_depth)
+    range_x: Range  # min/max values for x
+    range_y: Range  # min/max values for y
+    (range_x, range_y) = get_min_max_values(maze_width, maze_height, source_node, max_depth)
 
-    predecessors: dict = dict.fromkeys(graph, None)  # routing table with shortest path to node
+    predecessors: Dict[Node, Union[Node, None]] = dict.fromkeys(graph, None)  # routing table with shortest path to node
 
     while len(min_heap) != 0:  # while there is a neighbour to process
 
+        closest_node_distance: int
+        closest_node: Node
         (closest_node_distance, closest_node) = heapq.heappop(min_heap)  # takes closest node from heap queue
 
-        # print("closest node:", closest_node, "items:", repr(graph.get(closest_node).items()))
-        neighbors: list = graph.get(closest_node).items()  #
+        # print("closest node:", closest_node, "items:", repr(graph.get(closest_node)))
+        neighbors: ItemsView[Node] = graph.get(closest_node).items()  #
 
+        neighbor: Node
+        weight: int
         for neighbor, weight in neighbors:  # for each neighbour
             # if the neihbour is not within the range, do not explore it
             if not (range_x[0] <= neighbor[0] <= range_x[1] and range_y[0] <= neighbor[1] <= range_y[1]):
@@ -139,9 +152,7 @@ Test dijkstra
 '''
 # graph = [[(1, 1), (2, 7), (5, 3)], [(0, 1), (2, 1), (5, 1)], [(0, 7), (1, 1)], [(4, 2), (5, 2)], [(3, 2), (5, 5)],
 #          [(0, 3), (1, 1), (3, 2), (4, 5)]]
-# result = dijkstra(graph, 0)
-#
-# print(repr(result)) # [0, 1, 2, 4, 6, 2]
+# print(repr(dijkstra(graph, 0)))  # [0, 1, 2, 4, 6, 2]
 
 '''
 Test dijkstra_route
