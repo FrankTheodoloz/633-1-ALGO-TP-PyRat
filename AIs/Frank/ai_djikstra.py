@@ -29,14 +29,12 @@ def get_closest_poc(maze_map: dict, source_location: tuple, piecesOfCheese: list
     # get distances and routes around location
     distances: dict
     toutes: dict
-    # (distances, routes) = dijkstra_route_maze_range(maze_map, maze_width, maze_height, source_location, MAX_DEPTH)
     (distances, routes) = dijkstra_route_maze(maze_map, source_location)
 
     # get min distances to poc
     poc_distances: dict = {k: v for k, v in distances.items() if 0 < v < float("inf") and k in piecesOfCheese}
 
-    # closest_poc: tuple = (float("inf"), float("inf"))  # source_location
-    closest_poc: tuple = source_location  # source_location
+    closest_poc: tuple = (None, None)
 
     # select closest poc
     if poc_distances.keys():
