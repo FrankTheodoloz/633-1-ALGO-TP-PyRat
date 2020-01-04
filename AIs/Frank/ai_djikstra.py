@@ -1,6 +1,3 @@
-# Template file to create an AI for the game PyRat
-# http://formations.telecom-bretagne.eu/pyrat
-
 ###############################
 # When the player is performing a move, it actually sends a character to the main program
 # The four possibilities are defined here
@@ -15,40 +12,40 @@ TEAM_NAME = '[DJIKSTRA] R@t_of_Fortune_888'
 # Please put your imports here
 import numpy
 from AIs.tools.djikstra import *
+from typing import Tuple, List, Dict
 
 ###############################
 # Please put your global variables here
-PATHS_TO_POC: list = []  # queue: from closest to farthest
-MOVES_TO_TARGET: list = []  # stack: from target to source
+Node = Tuple[int, int]
+PATHS_TO_POC: List[Node] = []  # queue: from closest to farthest
+MOVES_TO_TARGET: List[Node] = []  # stack: from target to source
 
 
-def get_closest_poc(maze_map: dict, source_location: tuple, piecesOfCheese: list) -> None:
+def get_closest_poc(maze_map: Dict[Node, Dict[Node, int]], source_location: Node, pieces_of_cheese: List[Node]) -> None:
     """ Function that build routes of closests pieces of cheese """
     global PATHS_TO_POC
 
     # get distances and routes around location
-    distances: dict
-    toutes: dict
+    distances: Dict[Node]
+    routes: Dict[Node]
     (distances, routes) = dijkstra_route_maze(maze_map, source_location)
 
     # get min distances to poc
-    poc_distances: dict = {k: v for k, v in distances.items() if 0 < v < float("inf") and k in piecesOfCheese}
-
-    closest_poc: tuple = (None, None)
+    poc_distances: Dict[Node, int] = {k: v for k, v in distances.items() if
+                                      0 < v < float("inf") and k in pieces_of_cheese}
 
     # select closest poc
-    if poc_distances.keys():
-        closest_poc = min(poc_distances, key=poc_distances.get)
+    closest_poc: Node = min(poc_distances, key=poc_distances.get)
 
     # add the route to the next closest poc in the closest_poc
     PATHS_TO_POC.append(get_path(source_location, closest_poc, routes))
 
 
-def get_path(source_location: tuple, target_location: tuple, routes: dict) -> list:
+def get_path(source_location: Node, target_location: Node, routes: Dict[Node, Node]) -> List[Node]:
     """ Function that returns a path to a point from the routing table """
-    path: list = []
+    path: List[Node] = []
 
-    def recursive_path_find(location):
+    def recursive_path_find(location: Node):
         """ Recursive function that gets the path from target to initial location """
         path.append(location)
 
@@ -60,10 +57,10 @@ def get_path(source_location: tuple, target_location: tuple, routes: dict) -> li
     return path
 
 
-def move_from_location(source_location: tuple, target_location: tuple):
+def move_from_location(source_location: Node, target_location: Node) -> str:
     """ Function that return the move to do from a source to a target """
     # print("going from:", source_location, "to:", target_location)
-    difference = tuple(numpy.subtract(target_location, source_location))
+    difference: Tuple[int, int] = tuple(numpy.subtract(target_location, source_location))
     if difference == (0, -1):
         return MOVE_DOWN
     elif difference == (0, 1):
